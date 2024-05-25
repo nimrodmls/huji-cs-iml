@@ -145,7 +145,7 @@ if __name__ == '__main__':
         print(f'Testing model over {p}% of the training data')
         for _ in tqdm(range(10)):
             model = LinearRegression(include_intercept=True)
-            trainset = X_train.sample(frac=p/100, random_state=0, replace=False)
+            trainset = X_train.sample(frac=p/100, replace=False)
             labels = y_train.loc[trainset.index]
             model.fit(trainset.to_numpy(), labels.to_numpy())
             losses_over_p[p].append(model.loss(X_test.to_numpy(), y_test.to_numpy()))
@@ -154,9 +154,11 @@ if __name__ == '__main__':
     plt.xlabel('Percentage of Training Data')
     plt.ylabel('Mean Loss')
     plt.title('Mean Loss as function of Training Size')
-    plt.plot(losses_over_p.keys(), [np.mean(losses) for losses in losses_over_p.values()])
-    #for p, losses in losses_over_p.items():
-    #    plt.errorbar(p, np.mean(losses), yerr=2*np.std(losses), fmt='o')
+    plt.plot(losses_over_p.keys(), [np.mean(losses) for losses in losses_over_p.values()], label='Mean Loss', color='blue')
+    # Plotting the error ribbons
+    for p, losses in losses_over_p.items():
+        plt.errorbar(p, np.mean(losses), yerr=2*np.std(losses), fmt='bo--', ecolor='grey', capsize=5)
+    plt.legend()
     plt.show()
 
 

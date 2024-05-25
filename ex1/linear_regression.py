@@ -95,4 +95,4 @@ class LinearRegression:
         loss : float
             Performance under MSE loss function
         """
-        return ((y - self.predict(X)) ** 2).sum().item() / len(y)
+        return ((y - self.predict(X)) ** 2).mean()

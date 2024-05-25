@@ -1,6 +1,6 @@
-
+import numpy as np
 import pandas as pd
-
+from polynomial_fitting import PolynomialFitting
 
 def load_data(filename: str) -> pd.DataFrame:
     """
@@ -20,6 +20,10 @@ def load_data(filename: str) -> pd.DataFrame:
 if __name__ == '__main__':
     # Question 2 - Load and preprocessing of city temperature dataset
     df = load_data("city_temperature.csv")
+
+    model = PolynomialFitting(3)
+    model.fit(np.array([[1,2,3], [4,5,6], [7,8,9]]), np.array([[1], [2], [3]]))
+
 
     # Question 3 - Exploring data for specific country
 
