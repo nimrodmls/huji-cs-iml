@@ -31,7 +31,9 @@ class LinearRegression:
         include_intercept: bool, default=True
             Should fitted model include an intercept or not
         """
-        pass
+        self.fitted_ = False
+        self.include_intercept_ = include_intercept
+        self.coefs_ = None
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -49,7 +51,13 @@ class LinearRegression:
         -----
         Fits model with or without an intercept depending on value of `self.include_intercept_`
         """
-        pass
+        # Adding a column of 1's to X if include_intercept_ is True
+        if self.include_intercept_:
+            X = np.hstack((np.ones((X.shape[0], 1)), X))
+
+        # Finding the weights using the Moore-Penrose Pseudo Inverse
+        self.coefs_ = np.linalg.pinv(X) @ y
+        self.fitted_ = True
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -65,7 +73,10 @@ class LinearRegression:
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        pass
+        if self.include_intercept_:
+            X = np.hstack((np.ones((X.shape[0], 1)), X))
+            
+        return X @ self.coefs_
 
     def loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -84,4 +95,4 @@ class LinearRegression:
         loss : float
             Performance under MSE loss function
         """
-        pass
+        return ((y - self.predict(X)) ** 2).sum().item() / len(y)
