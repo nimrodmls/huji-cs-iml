@@ -19,7 +19,7 @@ class PolynomialFitting(LinearRegression):
         super().__init__(include_intercept=False)
         self.k = k
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
+    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
         """
         Fit Least Squares model to polynomial transformed samples
 
@@ -47,7 +47,7 @@ class PolynomialFitting(LinearRegression):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        super().predict(self.__transform(X))
+        return super().predict(self.__transform(X))
 
     def loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -66,7 +66,7 @@ class PolynomialFitting(LinearRegression):
         loss : float
             Performance under MSE loss function
         """
-        super().loss(self.__transform(X), y)
+        return super()._base_loss(self.predict(X), y)
 
     def __transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -81,7 +81,4 @@ class PolynomialFitting(LinearRegression):
         transformed: ndarray of shape (n_samples, k+1)
             Vandermonde matrix of given samples up to degree k
         """
-        poly_transformed = np.zeros(shape=(X.shape[0], (self.k+1) * X.shape[1]))
-        for i in range(X.shape[0]): 
-            poly_transformed[i] = np.vander(X[i], N=self.k+1, increasing=True).flatten()
-        return poly_transformed
+        return np.vander(X, N=self.k+1, increasing=True)
