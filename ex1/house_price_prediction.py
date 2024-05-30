@@ -160,7 +160,4 @@ if __name__ == '__main__':
     for p, losses in losses_over_p.items():
         plt.errorbar(p, np.mean(losses), yerr=2*np.std(losses), fmt='bo--', ecolor='grey', capsize=5)
     plt.legend()
-    plt.show()
-
-
-
+    plt.savefig('mean_loss_over_training_size.png')

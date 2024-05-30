@@ -66,7 +66,7 @@ class PolynomialFitting(LinearRegression):
         loss : float
             Performance under MSE loss function
         """
-        return super()._base_loss(self.predict(X), y)
+        return super().loss(X, y)
 
     def __transform(self, X: np.ndarray) -> np.ndarray:
         """

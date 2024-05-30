@@ -35,7 +35,7 @@ class LinearRegression:
         self.include_intercept_ = include_intercept
         self.coefs_ = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
+    def fit(self, X: np.ndarray, y: np.ndarray) -> None:
         """
         Fit Least Squares model to given samples
 
@@ -95,7 +95,7 @@ class LinearRegression:
         loss : float
             Performance under MSE loss function
         """
-        return self._base_loss(self.predict(X), y)
+        return ((y - self.predict(X)) ** 2).mean()
     
     def _base_loss(self, pred: np.ndarray, y: np.ndarray) -> float:
         """
@@ -114,4 +114,4 @@ class LinearRegression:
         loss : float
             Performance under MSE loss function
         """
-        return ((y - pred) ** 2).mean()
+        return 
