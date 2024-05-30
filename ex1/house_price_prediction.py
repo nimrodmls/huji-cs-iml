@@ -10,7 +10,7 @@ TEST_SIZE = 0.25
 
 def general_preprocess(X: pd.DataFrame, y: pd.Series = None):
     # Dropping the ID, sqft_lot15, sqft_living15 columns - not useful for prediction
-    # Dropping the sqft_lot column as it's dependent on sqft_above and sqft_basement
+    # Dropping the sqft_lot column as it's linearly dependent on sqft_above and sqft_basement
     X = X.drop(columns=['date', 'id', 'sqft_lot', 'sqft_lot15', 'sqft_living15'], axis=1)
     # Converting longitudes to positive values
     X.long = (X.long + 360.0) % 360.0
@@ -114,6 +114,7 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         plt.scatter(X[feature].values, y.values)
         plt.title(f'{feature} - Pearson Correlation: {pearson_correlation(X[feature], y)}')
         plt.savefig(os.path.join(output_path, f'{feature}.png'))
+        plt.close()
 
 if __name__ == '__main__':
     np.random.seed(0)
@@ -128,7 +129,7 @@ if __name__ == '__main__':
     X_train, y_train = preprocess_train(X_train, y_train)
     
     # Question 4 - Feature evaluation of train dataset with respect to response
-    #feature_evaluation(X_train, y_train) # TODO: REMOVE COMMENT
+    feature_evaluation(X_train, y_train) # TODO: REMOVE COMMENT
 
     # Question 5 - preprocess the test data
     X_test = preprocess_test(X_test)
