@@ -96,22 +96,3 @@ class LinearRegression:
             Performance under MSE loss function
         """
         return ((y - self.predict(X)) ** 2).mean()
-    
-    def _base_loss(self, pred: np.ndarray, y: np.ndarray) -> float:
-        """
-        Evaluate performance under **mean squared error (MSE) loss function**
-
-        Parameters
-        ----------
-        X : ndarray of shape (n_samples, n_features)
-            Test samples
-
-        y : ndarray of shape (n_samples, )
-            True labels of test samples
-
-        Returns
-        -------
-        loss : float
-            Performance under MSE loss function
-        """
-        return 

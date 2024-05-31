@@ -9,6 +9,15 @@ from linear_regression import LinearRegression
 TEST_SIZE = 0.25
 
 def general_preprocess(X: pd.DataFrame, y: pd.Series = None):
+    # Adding the room to lot ratio as a new feature, the smaller, the denser the lot is
+    room_lot_ratio = np.where((X.bathrooms + X.bedrooms) > 0, X.sqft_lot / (X.bathrooms + X.bedrooms), 0)
+    X.insert(len(X.columns), 'room_lot_ratio', room_lot_ratio)
+
+    # Adding the residential units as a new feature, more units should reflect a higher price
+    # a residential unit is defined as a single bathroom to multiple bedrooms
+    residential_units = np.where(X.bathrooms > 0, X.bedrooms / X.bathrooms, 0)
+    X.insert(len(X.columns), 'residential_units', residential_units)
+
     # Dropping the ID, sqft_lot15, sqft_living15 columns - not useful for prediction
     # Dropping the sqft_lot column as it's linearly dependent on sqft_above and sqft_basement
     X = X.drop(columns=['date', 'id', 'sqft_lot', 'sqft_lot15', 'sqft_living15'], axis=1)
@@ -45,7 +54,7 @@ def preprocess_train(X: pd.DataFrame, y: pd.Series):
     lot_mask = X.sqft_living <= X.sqft_above + X.sqft_basement
     X = X.loc[lot_mask, :]
     y = y.loc[lot_mask]
-    if lot_mask.sum() != len(y):
+    if lot_mask.sum() != len(lot_mask):
         print('Removed corrupted samples due to sqft_living <= sqft_above + sqft_basement')
 
     # Removing samples with 0 bedrooms or 0 bathrooms
@@ -54,7 +63,7 @@ def preprocess_train(X: pd.DataFrame, y: pd.Series):
     mask = bed_mask & bath_mask
     X = X.loc[mask, :]
     y = y.loc[mask]
-    if mask.sum() != len(y):
+    if mask.sum() != len(mask):
         print('Removed samples with 0 bedrooms or 0 bathrooms')
 
     return X, y
