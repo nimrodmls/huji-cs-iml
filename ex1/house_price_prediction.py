@@ -126,7 +126,7 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         plt.close()
 
 if __name__ == '__main__':
-    np.random.seed(0)
+    np.random.seed(42)
 
     df = pd.read_csv("house_prices.csv")
     X, y = df.drop("price", axis=1), df.price
@@ -138,7 +138,7 @@ if __name__ == '__main__':
     X_train, y_train = preprocess_train(X_train, y_train)
     
     # Question 4 - Feature evaluation of train dataset with respect to response
-    feature_evaluation(X_train, y_train) # TODO: REMOVE COMMENT
+    feature_evaluation(X_train, y_train)
 
     # Question 5 - preprocess the test data
     X_test = preprocess_test(X_test)

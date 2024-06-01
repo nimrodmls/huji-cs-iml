@@ -21,10 +21,16 @@ def load_data(filename: str) -> pd.DataFrame:
     df = pd.read_csv(filename, parse_dates=['Date'])
     df.insert(len(df.columns), 'DayOfYear', [row.Date.dayofyear for i, row in df.iterrows()])
 
+    # Some samples have the weird temperature value of -72.77777777777777
+    # We will remove these samples from the dataset
     df = df.loc[df.Temp != -72.77777777777777]
+
     return df
 
 if __name__ == '__main__':
+    # Setting random seed for reproducibility
+    np.random.seed(42)
+
     # Question 2 - Load and preprocessing of city temperature dataset
     df = load_data("city_temperature.csv")
 
