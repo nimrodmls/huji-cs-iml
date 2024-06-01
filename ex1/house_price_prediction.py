@@ -17,10 +17,10 @@ def general_preprocess(X: pd.DataFrame, y: pd.Series = None):
     # a residential unit is defined as a single bathroom to multiple bedrooms
     residential_units = np.where(X.bathrooms > 0, X.bedrooms / X.bathrooms, 0)
     X.insert(len(X.columns), 'residential_units', residential_units)
+    X.loc[X.residential_units < 1, 'residential_units'] = 1
 
     # Dropping the ID, sqft_lot15, sqft_living15 columns - not useful for prediction
-    # Dropping the sqft_lot column as it's linearly dependent on sqft_above and sqft_basement
-    X = X.drop(columns=['date', 'id', 'sqft_lot', 'sqft_lot15', 'sqft_living15'], axis=1)
+    X = X.drop(columns=['date', 'id', 'sqft_lot15', 'sqft_living15'], axis=1)
     # Converting longitudes to positive values
     X.long = (X.long + 360.0) % 360.0
 
@@ -122,7 +122,7 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         plt.ylabel('Response')
         plt.scatter(X[feature].values, y.values)
         plt.title(f'{feature} - Pearson Correlation: {pearson_correlation(X[feature], y)}')
-        plt.savefig(os.path.join(output_path, f'{feature}.png'))
+        plt.savefig(os.path.join(output_path, f'{feature}.pdf'))
         plt.close()
 
 if __name__ == '__main__':
@@ -169,4 +169,4 @@ if __name__ == '__main__':
     for p, losses in losses_over_p.items():
         plt.errorbar(p, np.mean(losses), yerr=2*np.std(losses), fmt='bo--', ecolor='grey', capsize=5)
     plt.legend()
-    plt.savefig('mean_loss_over_training_size.png')
+    plt.savefig('mean_loss_over_training_size.pdf')

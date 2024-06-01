@@ -39,13 +39,15 @@ if __name__ == '__main__':
     for year in israel_data.Year.unique():
         data_per_year = israel_data.loc[israel_data.Year == year]
         plt.scatter(data_per_year.DayOfYear, data_per_year.Temp, s=3, label=f'{year}')
-    plt.legend()
-    plt.close() #plt.show()
+    plt.legend(fontsize='small', title='Year')
+    plt.savefig('daily_temperature.pdf')
+    plt.close()
 
     # Q3.2 - Plotting temperature standard deviation per month
     israel_data.groupby('Month').Temp.std().plot(
         ylabel='STD', kind='bar', title='Temperature Standard Deviation per Month')
-    plt.close() #plt.show()
+    plt.savefig('temp_std_per_month.pdf')
+    plt.close()
 
     # Question 4 - Exploring differences between countries
     country_data = df.groupby(['Country', 'Month'])
@@ -58,10 +60,10 @@ if __name__ == '__main__':
     for country in df.Country.unique():
         current_country_temps = countries_mean_temp[country, :]
         current_country_std = countries_std_temp[country, :]
-        #plt.plot(current_country_temps.keys(), current_country_temps, label=country)
         plt.errorbar(current_country_temps.keys(), current_country_temps, yerr=current_country_std, capsize=5, label=country)
     plt.legend()
-    plt.close() #plt.show()
+    plt.savefig('mean_temp_per_month.pdf')
+    plt.close()
 
     # Question 5 - Fitting model for different values of `k`
     X = israel_data.DayOfYear.to_numpy()
@@ -81,7 +83,8 @@ if __name__ == '__main__':
     plt.ylabel('Loss')
     plt.title('Loss as function of Polynomial Degree')
     plt.bar(losses_over_k.keys(), losses_over_k.values(), label='Loss', color='blue')
-    plt.show()
+    plt.savefig('loss_over_k.pdf')
+    plt.close()
 
     # Question 6 - Evaluating fitted model on different countries
     chosen_k = 5
@@ -102,4 +105,5 @@ if __name__ == '__main__':
     plt.ylabel('Loss')
     plt.title('Loss as function of Country')
     plt.bar(losses_over_country.keys(), losses_over_country.values(), label='Loss', color='blue')
-    plt.show()
+    plt.savefig('loss_over_country.pdf')
+    plt.close()
