@@ -1,4 +1,3 @@
-from typing import NoReturn
 from linear_regression import LinearRegression
 import numpy as np
 
