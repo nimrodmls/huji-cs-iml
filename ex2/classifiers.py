@@ -181,7 +181,30 @@ class LDA(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        self.classes_ = y.unique()
+        self.pi_ = np.zeros(self.classes_.shape[0])
+        self.mu_ = np.zeros((self.classes_.shape[0], X.shape[1]))
+        
+        for i, c in enumerate(self.classes_):
+            cl_map = y == c
+
+            # Computing the pi value for the class
+            self.pi_[i] = cl_map.sum() / X.shape[0]
+
+            Xc = X[cl_map]
+
+            # Computing the mean vector for the class
+            class_mean = Xc.mean(axis=0)
+            self.mu_[i] = class_mean
+
+            # Calculating the covariance matrix
+            Xc -= class_mean
+            self.cov_ += np.dot(Xc, Xc)
+            
+        self.cov_ /= X.shape[0] # Finalizing the covariance calculations
+
+        # Calculating the inverse of the covariance matrix
+        self._cov_inv = inv(self.cov_)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -197,7 +220,7 @@ class LDA(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        return np.argmax(self.likelihood(X), axis=1)
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -217,7 +240,12 @@ class LDA(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        raise NotImplementedError()
+        class_confidence = []
+        for i, c in enumerate(self.classes_):
+            a_k = self._cov_inv @ self.mu_[i]
+            b_k = np.log(self.pi_[i]) - (0.5 * self.mu_[i] @ self._cov_inv @ self.mu_[i])
+            class_confidence.append(a_k.T @ X + b_k)
+        return np.array(class_confidence)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -236,8 +264,7 @@ class LDA(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        from loss_functions import misclassification_error
-        raise NotImplementedError()
+        return misclassification_error(X, self.predict(X))
 
 class GaussianNaiveBayes(BaseEstimator):
     """
