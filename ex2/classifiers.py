@@ -80,22 +80,22 @@ class Perceptron(BaseEstimator):
 
         self.coefs_ = np.zeros(X_.shape[1])
         for _ in range(self.max_iter_ + 1):
-            # if (y @ (X_ @ self.coefs_) <= 0).sum().item():
-            #     self.coefs_ += y @ X_
-            #     self.callback_(self, X_, y)
-            # else:
-            #     return
             converged = True
-            for i in range(X_.shape[0]):
-                if y[i] * (X_[i] @ self.coefs_) <= 0:
-                    self.coefs_ += y[i] * X_[i]
-                    self.fitted_ = True
-                    # Passing the original sample and response to the callback
-                    #self.callback_(self, np.array([X[i]]), np.array([y[i]]))
-                    self.callback_(self, X, y)
-                    self.fitted_ = False
-                    converged = False
-                    break 
+            # Checking if there are any misclassified samples
+            convergence_map = (y * (X_ @ self.coefs_)) <= 0
+            if convergence_map.sum() > 0:
+                # Taking the first misclassified sample and updating the model
+                step_sample = X_[convergence_map][0]
+                step_response = y[convergence_map][0]
+                self.coefs_ += step_response * step_sample
+                converged = False
+                
+                # Calling the callback. Model is marked fitted for this part,
+                # so the callback can use the model's full functionality to
+                # evaluate the model's performance
+                self.fitted_ = True
+                self.callback_(self, X, y)
+                self.fitted_ = False
 
             # If the perceptron converged, return - no more iterations required
             if converged:
