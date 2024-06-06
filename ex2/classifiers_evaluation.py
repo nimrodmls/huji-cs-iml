@@ -1,4 +1,5 @@
 from classifiers import Perceptron, LDA, GaussianNaiveBayes
+from loss_functions import accuracy
 from typing import Tuple, List
 from utils import *
 import matplotlib.pyplot as plt
@@ -91,16 +92,25 @@ def compare_gaussian_classifiers():
     """
     for f in ["gaussian1.npy", "gaussian2.npy"]:
         # Load dataset
-        raise NotImplementedError()
+        X, y = load_dataset(f)
 
         # Fit models and predict over training set
-        raise NotImplementedError()
+        gnb_model = GaussianNaiveBayes()
+        gnb_model.fit(X, y)
+
+        lda_model = LDA()
+        lda_model.fit(X, y)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
-        from loss_functions import accuracy
-        raise NotImplementedError()
+        figure = make_subplots(rows=1, cols=2, subplot_titles=("Gaussian Naive Bayes", "LDA"))
+        figure.update_layout(title=f"Classifier Comparison - Dataset: {f}")
+        figure.add_trace(go.Scatter(x=X[y == 0, 0], y=X[y == 0, 1], mode="markers", marker_color="blue", name="Class 0"),
+                            row=1, col=1)
+        figure.add_trace(go.Scatter(x=X[y == 1, 0], y=X[y == 1, 1], mode="markers", marker_color="red", name="Class 1"),
+                            row=1, col=1)
+        
 
         # Add traces for data-points setting symbols and colors
         raise NotImplementedError()
