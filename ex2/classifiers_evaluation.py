@@ -1,7 +1,7 @@
 from classifiers import Perceptron, LDA, GaussianNaiveBayes
 from loss_functions import accuracy
 from typing import Tuple, List
-from utils import *
+from utils import decision_surface, class_colors, class_symbols
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
@@ -97,23 +97,26 @@ def compare_gaussian_classifiers():
         # Fit models and predict over training set
         gnb_model = GaussianNaiveBayes()
         gnb_model.fit(X, y)
+        #gnb_preds = gnb_model.predict(X)
 
         lda_model = LDA()
         lda_model.fit(X, y)
+        #lda_preds = lda_model.predict(X)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
         figure = make_subplots(rows=1, cols=2, subplot_titles=("Gaussian Naive Bayes", "LDA"))
         figure.update_layout(title=f"Classifier Comparison - Dataset: {f}")
-        figure.add_trace(go.Scatter(x=X[y == 0, 0], y=X[y == 0, 1], mode="markers", marker_color="blue", name="Class 0"),
-                            row=1, col=1)
-        figure.add_trace(go.Scatter(x=X[y == 1, 0], y=X[y == 1, 1], mode="markers", marker_color="red", name="Class 1"),
-                            row=1, col=1)
         
-
         # Add traces for data-points setting symbols and colors
-        raise NotImplementedError()
+        figure.add_trace(decision_surface(gnb_model.predict, [X[:, 0].min(), X[:, 0].max()], [X[:, 1].min(), X[:, 1].max()], dotted=True), row=1, col=1)
+        figure.add_trace(decision_surface(lda_model.predict, [X[:, 0].min(), X[:, 0].max()], [X[:, 1].min(), X[:, 1].max()], dotted=True), row=1, col=2)
+        #figure.add_trace(go.Scatter(x=X[y == 0, 0], y=X[y == 0, 1], mode="markers",
+        #                            marker=dict(color="blue", symbol="circle"), name="Class 0"), row=1, col=1)
+        # figure.add_trace(go.Scatter(x=X[y == 1, 0], y=X[y == 1, 1], mode="markers", marker_color="red", name="Class 1"),
+        #                     row=1, col=2)
+        figure.show()
 
         # Add `X` dots specifying fitted Gaussians' means
         raise NotImplementedError()
@@ -123,6 +126,7 @@ def compare_gaussian_classifiers():
 
 
 if __name__ == '__main__':
-    np.random.seed(0)
-    run_perceptron()
-    #compare_gaussian_classifiers()
+    np.random.seed(42)
+
+    #run_perceptron()
+    compare_gaussian_classifiers()

@@ -181,9 +181,10 @@ class LDA(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        self.classes_ = y.unique()
+        self.classes_ = np.unique(y)
         self.pi_ = np.zeros(self.classes_.shape[0])
         self.mu_ = np.zeros((self.classes_.shape[0], X.shape[1]))
+        self.cov_ = np.zeros((X.shape[1], X.shape[1]))
         
         for i, c in enumerate(self.classes_):
             cl_map = y == c
@@ -199,7 +200,7 @@ class LDA(BaseEstimator):
 
             # Calculating the covariance matrix
             Xc -= class_mean
-            self.cov_ += np.dot(Xc, Xc)
+            self.cov_ += np.dot(Xc.T, Xc)
             
         self.cov_ /= X.shape[0] # Finalizing the covariance calculations
 
@@ -240,11 +241,11 @@ class LDA(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        class_confidence = []
+        class_confidence = np.zeros((X.shape[0], self.classes_.shape[0]))
         for i, c in enumerate(self.classes_):
             a_k = self._cov_inv @ self.mu_[i]
             b_k = np.log(self.pi_[i]) - (0.5 * self.mu_[i] @ self._cov_inv @ self.mu_[i])
-            class_confidence.append(a_k.T @ X + b_k)
+            class_confidence[:, i] = X @ a_k + b_k
         return np.array(class_confidence)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -303,9 +304,10 @@ class GaussianNaiveBayes(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        self.classes_ = y.unique()
+        self.classes_ = np.unique(y)
         self.pi_ = np.zeros(self.classes_.shape[0])
         self.mu_ = np.zeros((self.classes_.shape[0], X.shape[1]))
+        self.vars_ = np.zeros((self.classes_.shape[0], X.shape[1]))
 
         for i, c in enumerate(self.classes_):
             cl_map = y == c
@@ -351,7 +353,8 @@ class GaussianNaiveBayes(BaseEstimator):
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `likelihood` function")
 
-        inner = np.exp(-(X - self.mu_) ** 2 / (2 * self.vars_)) / np.sqrt(2 * np.pi * self.vars_)
+        X_ = X[:, np.newaxis, :]
+        inner = np.exp(-(X_ - self.mu_) ** 2 / (2 * self.vars_)) / np.sqrt(2 * np.pi * self.vars_)
         return self.pi_ * np.prod(inner, axis=2)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
