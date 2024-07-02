@@ -52,6 +52,7 @@ def run_perceptron():
             callback=lambda perceptron, X, y: losses.append(perceptron.loss(X, y)))
         perceptron.fit(X, y)
 
+        
         # Plot figure of loss as function of fitting iteration
         plt.figure()
         plt.plot(range(1, len(losses) + 1), losses, label="Training Loss", color="red")
@@ -156,6 +157,8 @@ def compare_gaussian_classifiers():
 
         # Add ellipses depicting the covariances of the fitted Gaussians
         for i, mu in enumerate(gnb_model.mu_):
+            # In Gaussian Naive Bayes, we assume that the samples are independent,
+            # and so, the covariance matrix will be diagonal with the variances of each feature
             cov = np.diag(gnb_model.vars_[i])
             figure.add_trace(get_ellipse(mu, cov), row=1, col=1) 
 

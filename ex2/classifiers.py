@@ -200,7 +200,7 @@ class LDA(BaseEstimator):
 
             # Calculating the covariance matrix
             Xc -= class_mean
-            self.cov_ += np.dot(Xc.T, Xc)
+            self.cov_ += Xc.T @ Xc
             
         self.cov_ /= X.shape[0] # Finalizing the covariance calculations
 
