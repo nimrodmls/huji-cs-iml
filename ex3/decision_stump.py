@@ -43,7 +43,7 @@ class DecisionStump(BaseEstimator):
         # Collecting the loss from each feature, and choosing the optimal (minimal loss)
         losses = []
         thresholds = []
-        for feature in range(X.shape(1)):
+        for feature in range(X.shape[1]):
             threshold, loss = self._find_threshold(X[:, feature], y, self.sign_)
             thresholds.append(threshold)
             losses.append(loss)

@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Tuple
 from utils import *
+import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -42,7 +43,21 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     (train_X, train_y), (test_X, test_y) = generate_data(train_size, noise), generate_data(test_size, noise)
 
     # Question 1: Train- and test errors of AdaBoost in noiseless case
-    raise NotImplementedError()
+    adaboost_model = AdaBoost(lambda: DecisionStump(), n_learners)
+    adaboost_model.fit(train_X, train_y)
+    train_errors = [adaboost_model.partial_loss(train_X, train_y, learner_count) 
+                    for learner_count in range(n_learners + 1)]
+    test_errors = [adaboost_model.partial_loss(test_X, test_y, learner_count)
+                   for learner_count in range(n_learners + 1)]
+
+    plt.figure()
+    plt.plot(train_errors, label='Train error')
+    plt.plot(test_errors, label='Test error')
+    plt.legend()
+    plt.xlabel('Number of learners')
+    plt.ylabel('Misclassification loss')
+    plt.title(f'Train & Test loss on AdaBoost with {n_learners} learners, noiseless case')
+    plt.show()
 
     # Question 2: Plotting decision surfaces
     T = [5, 50, 100, 250]
@@ -58,4 +73,4 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
 
 if __name__ == '__main__':
     np.random.seed(0)
-    raise NotImplementedError()
+    fit_and_evaluate_adaboost(noise=0)
