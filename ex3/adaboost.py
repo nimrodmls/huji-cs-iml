@@ -61,8 +61,10 @@ class AdaBoost(BaseEstimator):
         self.D_ = [1/X.shape[0] * np.ones(X.shape[0])]
 
         for boost_iter in tqdm(range(self.iterations_)):
+            # Ranomly sampling the samples according to the weights
+            samples_idx = np.random.choice(range(X.shape[0]), size=X.shape[0], replace=True, p=self.D_[-1])
             model = self.wl_()
-            model.fit(X, y)
+            model.fit(X[samples_idx], y)
 
             # The confidence rating for the current model
             # referred as epsilon-t in the notes (where t is equivalent to boost_iter)
