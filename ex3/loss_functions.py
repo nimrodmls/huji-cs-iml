@@ -18,6 +18,7 @@ def misclassification_error(y_true: np.ndarray, y_pred: np.ndarray, normalize: b
     -------
     Misclassification of given predictions
     """
-    raise NotImplementedError()
+    misclass_cnt = (y_true != y_pred).sum()
+    return misclass_cnt / y_true.shape[0] if normalize else misclass_cnt
 
 
