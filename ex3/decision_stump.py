@@ -110,15 +110,15 @@ class DecisionStump(BaseEstimator):
         labels = labels[sort_idx]
 
         loss = []
-        #baseline = np.full(values.shape[0], sign)
+        # Starting with the baseline misclassification error - 
+        # Considering all the samples as classified as one label, and updating
+        # the baseline threshold for each sample
         baseline_miss = (np.full(values.shape[0], sign) != labels)
         # Using each of the feature values as baseline threshold
         for sample_idx in range(values.shape[0]):
             # Compute misclassification error
-            #loss.append(misclassification_error(labels, baseline))
             loss.append(baseline_miss.sum())
             # Update baseline threshold
-            #baseline[sample_idx] = -sign
             baseline_miss[sample_idx] = not baseline_miss[sample_idx]
 
         arg_min_loss = np.argmin(loss)

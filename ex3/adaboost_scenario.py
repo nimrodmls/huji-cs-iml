@@ -56,13 +56,21 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     plt.legend()
     plt.xlabel('Number of learners')
     plt.ylabel('Misclassification loss')
-    plt.title(f'Train & Test loss on AdaBoost with {n_learners} learners, noiseless case')
-    plt.show()
+    plt.title(f'Train & Test loss on AdaBoost with {n_learners} learners')
+    plt.savefig("q1_train_test_loss.pdf")
 
     # Question 2: Plotting decision surfaces
     T = [5, 50, 100, 250]
     lims = np.array([np.r_[train_X, test_X].min(axis=0), np.r_[train_X, test_X].max(axis=0)]).T + np.array([-.1, .1])
-    raise NotImplementedError()
+    figure = make_subplots(rows=1, cols=len(T), subplot_titles=[f'T = {t}' for t in T])
+    figure.update_layout(title='Decision surfaces of AdaBoost with varied number of learners')
+    for i, t in enumerate(T):
+        predict = lambda X: adaboost_model.partial_predict(X, t)
+        figure.add_trace(
+            decision_surface(predict, lims[0], lims[1], showscale=False), row=1, col=i+1)
+        figure.add_trace(
+            go.Scatter(x=test_X[:, 0], y=test_X[:, 1], mode='markers', marker=dict(color=test_y, colorscale=class_colors(2))), row=1, col=i+1)
+    figure.show()
 
     # Question 3: Decision surface of best performing ensemble
     raise NotImplementedError()
