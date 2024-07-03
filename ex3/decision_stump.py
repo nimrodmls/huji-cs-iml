@@ -26,7 +26,7 @@ class DecisionStump(BaseEstimator):
         Instantiate a Decision stump classifier
         """
         super().__init__()
-        self.threshold_, self.j_, self.sign_ = None, None, 1
+        self.threshold_, self.j_, self.sign_ = None, None, None
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -40,17 +40,16 @@ class DecisionStump(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        # Collecting the loss from each feature, and choosing the optimal (minimal loss)
-        losses = []
-        thresholds = []
-        for feature in range(X.shape[1]):
-            threshold, loss = self._find_threshold(X[:, feature], y, self.sign_)
-            thresholds.append(threshold)
-            losses.append(loss)
-        
-        # The arg of the minimal loss value is the feature index with minimal loss
-        self.j_ = np.argmin(losses)
-        self.threshold_ = thresholds[self.j_]
+        min_loss = np.inf
+        # Attempting all combinations of features and signs for best prediction
+        for feature, sign in product(range(X.shape[1]), (-1, 1)):
+            threshold, loss = self._find_threshold(X[:, feature], y, sign)
+            # Update best threshold if found
+            if loss < min_loss:
+                self.j_ = feature
+                self.sign_ = sign
+                self.threshold_ = threshold
+                min_loss = loss
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -106,13 +105,21 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
+        sort_idx = np.argsort(values)
+        values = values[sort_idx]
+        labels = labels[sort_idx]
+
         loss = []
+        #baseline = np.full(values.shape[0], sign)
+        baseline_miss = (np.full(values.shape[0], sign) != labels)
         # Using each of the feature values as baseline threshold
-        for threshold in values:
-            # Predictions for values below and above threshold
-            predictions = np.where(values < threshold, -sign, sign)
+        for sample_idx in range(values.shape[0]):
             # Compute misclassification error
-            loss.append(misclassification_error(labels, predictions))
+            #loss.append(misclassification_error(labels, baseline))
+            loss.append(baseline_miss.sum())
+            # Update baseline threshold
+            #baseline[sample_idx] = -sign
+            baseline_miss[sample_idx] = not baseline_miss[sample_idx]
 
         arg_min_loss = np.argmin(loss)
         return values[arg_min_loss], loss[arg_min_loss]

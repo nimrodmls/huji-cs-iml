@@ -62,14 +62,15 @@ class AdaBoost(BaseEstimator):
 
         for boost_iter in tqdm(range(self.iterations_)):
             # Ranomly sampling the samples according to the weights
-            samples_idx = np.random.choice(range(X.shape[0]), size=X.shape[0], replace=True, p=self.D_[-1])
+            samples_idx = np.random.choice(
+                range(X.shape[0]), size=X.shape[0], replace=True, p=self.D_[-1])
             model = self.wl_()
-            model.fit(X[samples_idx], y)
+            model.fit(X[samples_idx], y[samples_idx])
 
             # The confidence rating for the current model
             # referred as epsilon-t in the notes (where t is equivalent to boost_iter)
             y_pred = model.predict(X)
-            model_confidence = ((y != y_pred) * self.D_[-1]).sum()
+            model_confidence = (self.D_[-1][y != y_pred]).sum()
             
             # Calculating the weight of the model
             model_weight = 0.5 * np.log((1 / model_confidence) - 1)
@@ -81,8 +82,6 @@ class AdaBoost(BaseEstimator):
             # Iteration complete - updating the ensemble
             self.models_.append(model)
             self.weights_.append(model_weight)
-
-        print("break")
 
     def _predict(self, X):
         """
@@ -139,7 +138,7 @@ class AdaBoost(BaseEstimator):
         preds = np.array([model.predict(X) for model in self.models_[:T+1]])
         # Preparing the weights for multiplication (note the addition of new dimension)
         weights = np.array(self.weights_[:T+1])[:, np.newaxis]
-        return np.sign((preds * weights).sum())
+        return np.sign((preds * weights).sum(axis=0))
 
     def partial_loss(self, X: np.ndarray, y: np.ndarray, T: int) -> float:
         """
