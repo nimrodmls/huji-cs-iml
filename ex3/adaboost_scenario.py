@@ -38,7 +38,6 @@ def generate_data(n: int, noise_ratio: float) -> Tuple[np.ndarray, np.ndarray]:
     y[np.random.choice(n, int(noise_ratio * n))] *= -1
     return X, y
 
-
 def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=500):
     (train_X, train_y), (test_X, test_y) = generate_data(train_size, noise), generate_data(test_size, noise)
 
@@ -57,7 +56,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     plt.xlabel('Number of learners')
     plt.ylabel('Misclassification loss')
     plt.title(f'Train & Test loss on AdaBoost with {n_learners} learners')
-    plt.savefig("q1_train_test_loss.pdf")
+    plt.savefig(f"q1_train_test_loss_{noise}.pdf")
 
     # Question 2: Plotting decision surfaces
     T = [5, 50, 100, 250]
@@ -67,18 +66,58 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     for i, t in enumerate(T):
         predict = lambda X: adaboost_model.partial_predict(X, t)
         figure.add_trace(
-            decision_surface(predict, lims[0], lims[1], showscale=False), row=1, col=i+1)
+            decision_surface(predict, lims[0], lims[1], showscale=False), 
+            row=1, col=i+1)
         figure.add_trace(
-            go.Scatter(x=test_X[:, 0], y=test_X[:, 1], mode='markers', marker=dict(color=test_y, colorscale=class_colors(2))), row=1, col=i+1)
-    figure.show()
+            go.Scatter(x=test_X[:, 0], 
+                       y=test_X[:, 1], 
+                       mode='markers', 
+                       marker=dict(color=test_y, colorscale=class_colors(2)), 
+                       showlegend=False), 
+            row=1, col=i+1)
+    figure.write_image(f"q2_t_decision_surfaces_{noise}.pdf")
 
     # Question 3: Decision surface of best performing ensemble
-    raise NotImplementedError()
+    accuracies = [(adaboost_model.partial_predict(test_X, t) == test_y).sum() / test_size
+                  for t in range(n_learners + 1)]
+    best_ensemble = np.argmax(accuracies)
+    predict = lambda X: adaboost_model.partial_predict(X, t)
+    figure = make_subplots(rows=1, cols=1)
+    figure.update_layout(
+        title=f'Decision surfaces of AdaBoost - Best Accuracy // Accuracy: {accuracies[best_ensemble]:.2f}, T = {best_ensemble}')
+    figure.add_trace(
+        decision_surface(predict, lims[0], lims[1], showscale=False), 
+        row=1, col=1)
+    figure.add_trace(
+        go.Scatter(x=test_X[:, 0], 
+                   y=test_X[:, 1], 
+                   mode='markers', 
+                   marker=dict(color=test_y, colorscale=class_colors(2)), 
+                   showlegend=False), 
+        row=1, col=1)
+    figure.write_image(f"q3_best_{noise}.pdf")
 
     # Question 4: Decision surface with weighted samples
-    raise NotImplementedError()
-
+    figure = make_subplots(rows=1, cols=1)
+    figure.update_layout(
+        title=f'Decision surfaces of AdaBoost - Weights at last iteration')
+    figure.add_trace(
+        decision_surface(adaboost_model.predict, lims[0], lims[1], showscale=False), 
+        row=1, col=1)
+    figure.add_trace(
+        go.Scatter(x=train_X[:, 0], 
+                   y=train_X[:, 1], 
+                   mode='markers', 
+                   marker=dict(color=train_y, 
+                               colorscale=class_colors(2),
+                               size=adaboost_model.D_[-1] / np.max(adaboost_model.D_[-1]) * 5), 
+                   showlegend=False), 
+        row=1, col=1)
+    figure.write_image(f"q4_weighted_{noise}.pdf")
 
 if __name__ == '__main__':
     np.random.seed(0)
+    # Questions 1-4
     fit_and_evaluate_adaboost(noise=0)
+    # Question 5
+    fit_and_evaluate_adaboost(noise=0.4)

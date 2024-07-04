@@ -104,7 +104,7 @@ class DecisionStump(BaseEstimator):
         -----
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
-        """
+        """ 
         sort_idx = np.argsort(values)
         values = values[sort_idx]
         labels = labels[sort_idx]
@@ -114,15 +114,19 @@ class DecisionStump(BaseEstimator):
         # Considering all the samples as classified as one label, and updating
         # the baseline threshold for each sample
         baseline_miss = (np.full(values.shape[0], sign) != labels)
+        loss.append(baseline_miss.sum())
         # Using each of the feature values as baseline threshold
         for sample_idx in range(values.shape[0]):
-            # Compute misclassification error
-            loss.append(baseline_miss.sum())
             # Update baseline threshold
             baseline_miss[sample_idx] = not baseline_miss[sample_idx]
+            # Compute misclassification error
+            loss.append(baseline_miss.sum())
 
         arg_min_loss = np.argmin(loss)
-        return values[arg_min_loss], loss[arg_min_loss]
+        # If the best threshold is the baseline threshold, return -infinity
+        if arg_min_loss == 0:
+            return sign * np.inf, loss[0]
+        return values[arg_min_loss - 1], loss[arg_min_loss - 1]
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
