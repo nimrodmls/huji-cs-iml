@@ -110,7 +110,10 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
                    mode='markers', 
                    marker=dict(color=train_y, 
                                colorscale=class_colors(2),
-                               size=adaboost_model.D_[-1] / np.max(adaboost_model.D_[-1]) * 5), 
+                               size=adaboost_model.D_[-1] / np.max(adaboost_model.D_[-1]) * 5,
+                               symbol=class_symbols[(train_y == 1).astype('int')],
+                               line=dict(width=0),
+                               opacity=1),
                    showlegend=False), 
         row=1, col=1)
     figure.write_image(f"q4_weighted_{noise}.pdf")
