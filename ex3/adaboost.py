@@ -2,7 +2,6 @@ import numpy as np
 from typing import Callable, NoReturn
 from base_estimator import BaseEstimator
 from loss_functions import misclassification_error
-from tqdm import tqdm
 
 class AdaBoost(BaseEstimator):
     """
@@ -60,7 +59,7 @@ class AdaBoost(BaseEstimator):
         # Initializing D to be uniform for the first iteration
         self.D_ = [1/X.shape[0] * np.ones(X.shape[0])]
 
-        for boost_iter in tqdm(range(self.iterations_)):
+        for boost_iter in range(self.iterations_):
             # Ranomly sampling the samples according to the weights
             samples_idx = np.random.choice(
                 range(X.shape[0]), size=X.shape[0], replace=True, p=self.D_[-1])
