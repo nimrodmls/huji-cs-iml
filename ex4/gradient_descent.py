@@ -8,10 +8,8 @@ from learning_rate import FixedLR
 
 OUTPUT_VECTOR_TYPE = ["last", "best", "average"]
 
-
 def default_callback(**kwargs) -> NoReturn:
     pass
-
 
 class GradientDescent:
     """
@@ -45,7 +43,7 @@ class GradientDescent:
                  tol: float = 1e-5,
                  max_iter: int = 1000,
                  out_type: str = "last",
-                 callback: Callable[[GradientDescent, ...], None] = default_callback):
+                 callback: Callable[[GradientDescent, np.ndarray, np.ndarray, np.ndarray, int, float, float], None] = default_callback):
         """
         Instantiate a new instance of the GradientDescent class
 
@@ -120,4 +118,6 @@ class GradientDescent:
                 Euclidean norm of w^(t)-w^(t-1)
 
         """
-        raise NotImplementedError()
+        w = np.empty()
+        for i in range(self.max_iter_):
+
