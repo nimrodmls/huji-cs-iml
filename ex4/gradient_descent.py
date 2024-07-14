@@ -118,6 +118,18 @@ class GradientDescent:
                 Euclidean norm of w^(t)-w^(t-1)
 
         """
-        w = np.empty()
-        for i in range(self.max_iter_):
+        # Initializing random step 0 weights
+        w = np.empty(f.weights.shape)
+
+        for t in range(self.max_iter_):
+            lr = self.learning_rate_.lr_step(t=t)
+
+            val = f.compute_output(X, y)
+            grad = f.compute_jacobian(X, y)
+
+            # Performing step
+            w = w - (lr * grad)
+
+            delta = np.linalg.norm(w - f.weights)
+            self.callback_(solver=self, weights=w, val=val, grad=grad, t=t, eta=lr, delta=delta)
 
