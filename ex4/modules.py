@@ -33,6 +33,7 @@ class L2(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
+        # TODO: Fix this, this doesn't support matrices
         return np.dot(self.weights, self.weights)
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:

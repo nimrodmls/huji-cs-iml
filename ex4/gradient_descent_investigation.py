@@ -1,13 +1,12 @@
 import numpy as np
 import pandas as pd
+import itertools
 from typing import Tuple, List, Callable, Type
 
 from base_module import BaseModule
 from base_learning_rate import  BaseLR
 from gradient_descent import GradientDescent
 from learning_rate import FixedLR
-
-
 
 # from IMLearn.desent_methods import GradientDescent, FixedLR, ExponentialLR
 from modules import L1, L2
@@ -79,14 +78,24 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
     weights: List[np.ndarray]
         Recorded parameters
     """
-    raise NotImplementedError()
+    all_values = []
+    all_weights = []
+    def callback(weights, val, **kwargs):
+        all_values.append(val)
+        all_weights.append(weights)
+
+    return callback, all_values, all_weights
 
 
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                  etas: Tuple[float] = (1, .1, .01, .001)):
-    raise NotImplementedError()
+    modules = [L1(weights=init), L2(weights=init)]
+    callback, values, weights = get_gd_state_recorder_callback()
 
-
+    for module, lr in itertools.product(modules, etas):
+        gd = GradientDescent(learning_rate=FixedLR(lr), callback=callback)
+        # Note that passing X,y is redundant, as L1/L2 are not based on samples
+        gd.fit(module, None, None)
 
 
 def load_data(path: str = "SAheart.data", train_portion: float = .8) -> \
