@@ -89,14 +89,17 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
 
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                  etas: Tuple[float] = (1, .1, .01, .001)):
-    modules = [L1(weights=init), L2(weights=init)]
-    callback, values, weights = get_gd_state_recorder_callback()
+    modules = [('L1', L1), ('L2', L2)]
 
-    for module, lr in itertools.product(modules, etas):
+    for (name, module), lr in itertools.product(modules, etas):
+        callback, values, weights = get_gd_state_recorder_callback()
+        weights.append(init)
+        
         gd = GradientDescent(learning_rate=FixedLR(lr), callback=callback)
         # Note that passing X,y is redundant, as L1/L2 are not based on samples
-        gd.fit(module, None, None)
-
+        gd.fit(module(weights=np.copy(init)), None, None)
+        fig = plot_descent_path(module, np.array(weights), title=f'module={name}, lr={lr}')
+        fig.write_image(f'{name}_fixed_{lr}.pdf')
 
 def load_data(path: str = "SAheart.data", train_portion: float = .8) -> \
         Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:

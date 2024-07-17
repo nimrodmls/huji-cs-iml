@@ -118,9 +118,9 @@ class GradientDescent:
                 Euclidean norm of w^(t)-w^(t-1)
 
         """
-        w = np.empty(f.weights.shape) # Initializing random step 0 weights
-        w_sum = w
-        best_w = w
+        w_prev = np.copy(f.weights)
+        w_sum = np.copy(f.weights)
+        best_w = np.copy(f.weights)
         best_w_val = np.inf
         t = 0
         delta = np.inf
@@ -128,30 +128,28 @@ class GradientDescent:
         while (t < self.max_iter_) and (delta > self.tol_):
             lr = self.learning_rate_.lr_step(t=t)
 
-            val = f.compute_output(X, y)
+            grad = f.compute_jacobian(X=X, y=y)
+
+            # Performing step, updating the module's weights is critical so
+            # that computing the output will be on par with the learned weights
+            f.weights -= lr * grad
+
+            val = f.compute_output(X=X, y=y)
             # Updating best weights - for when out_type is 'best'
             if val < best_w_val:
-                best_w = w
+                best_w = f.weights
                 best_w_val = val
 
-            grad = f.compute_jacobian(X, y)
-
-            # Performing step
-            w = w - (lr * grad)
-
             # Updating sum of weights for when out_type is 'average'
-            w_sum += w
+            w_sum += f.weights
 
-            delta = np.linalg.norm(w - f.weights)
-            self.callback_(solver=self, weights=w, val=val, grad=grad, t=t, eta=lr, delta=delta)
+            delta = np.linalg.norm(w_prev - f.weights)
+            self.callback_(solver=self, weights=np.copy(f.weights), val=val, grad=grad, t=t, eta=lr, delta=delta)
 
             t += 1
-
-        # Updating the model's weights post decent        
-        f.weights = w
     
         if self.out_type_ == "last":
-            return w
+            return f.weights
         elif self.out_type_ == "best":
             return best_w
         elif self.out_type_ == "average":

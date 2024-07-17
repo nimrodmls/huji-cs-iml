@@ -34,7 +34,7 @@ class L2(BaseModule):
             Value of function at point self.weights
         """
         # TODO: Fix this, this doesn't support matrices
-        return np.dot(self.weights, self.weights)
+        return np.dot(self.weights.T, self.weights)
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
