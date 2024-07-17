@@ -132,6 +132,7 @@ class GradientDescent:
 
             # Performing step, updating the module's weights is critical so
             # that computing the output will be on par with the learned weights
+            w_prev = np.copy(f.weights)
             f.weights -= lr * grad
 
             val = f.compute_output(X=X, y=y)

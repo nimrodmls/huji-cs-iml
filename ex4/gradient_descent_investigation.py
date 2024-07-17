@@ -90,6 +90,7 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                  etas: Tuple[float] = (1, .1, .01, .001)):
     modules = [('L1', L1), ('L2', L2)]
+    all_values = {name: {eta: None for eta in etas} for name, _ in modules}
 
     for (name, module), lr in itertools.product(modules, etas):
         callback, values, weights = get_gd_state_recorder_callback()
@@ -98,8 +99,25 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
         gd = GradientDescent(learning_rate=FixedLR(lr), callback=callback)
         # Note that passing X,y is redundant, as L1/L2 are not based on samples
         gd.fit(module(weights=np.copy(init)), None, None)
+        all_values[name][lr] = values
+
+        # Plotting the descent path for each Module-LR combination
         fig = plot_descent_path(module, np.array(weights), title=f'module={name}, lr={lr}')
         fig.write_image(f'{name}_fixed_{lr}.pdf')
+
+    # Plotting convergence rate of each module-LR combination, one plot for each module
+    for name, lr_deltas in all_values.items():
+        fig = go.Figure(layout=go.Layout(title=f"{name} - Convergence Rate",
+                                         xaxis=dict(title='GD Iteration'),
+                                         yaxis=dict(title='Values')))
+        
+        for eta, deltas in lr_deltas.items():
+            fig.add_trace(go.Scatter(x=list(range(len(deltas))), 
+                                     y=deltas, 
+                                     mode='lines+markers', 
+                                     name=f'lr={eta}'))
+
+        fig.write_image(f'{name}_fixed_conv_rate.pdf')
 
 def load_data(path: str = "SAheart.data", train_portion: float = .8) -> \
         Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
