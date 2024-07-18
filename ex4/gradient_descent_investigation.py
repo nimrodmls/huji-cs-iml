@@ -80,6 +80,7 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
     """
     all_values = []
     all_weights = []
+    
     def callback(weights, val, **kwargs):
         all_values.append(val)
         all_weights.append(weights)
