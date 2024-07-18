@@ -12,6 +12,7 @@ from learning_rate import FixedLR
 from modules import L1, L2
 from logistic_regression import LogisticRegression
 from utils import split_train_test
+from sklearn import metrics
 
 import plotly.graph_objects as go
 
@@ -107,14 +108,14 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
         fig.write_image(f'{name}_fixed_{lr}.pdf')
 
     # Plotting convergence rate of each module-LR combination, one plot for each module
-    for name, lr_deltas in all_values.items():
+    for name, lr_values in all_values.items():
         fig = go.Figure(layout=go.Layout(title=f"{name} - Convergence Rate",
                                          xaxis=dict(title='GD Iteration'),
                                          yaxis=dict(title='Values')))
         
-        for eta, deltas in lr_deltas.items():
-            fig.add_trace(go.Scatter(x=list(range(len(deltas))), 
-                                     y=deltas, 
+        for eta, values in lr_values.items():
+            fig.add_trace(go.Scatter(x=list(range(len(values))), 
+                                     y=values, 
                                      mode='lines+markers', 
                                      name=f'lr={eta}'))
 
@@ -155,9 +156,21 @@ def load_data(path: str = "SAheart.data", train_portion: float = .8) -> \
 def fit_logistic_regression():
     # Load and split SA Heard Disease dataset
     X_train, y_train, X_test, y_test = load_data()
+    X_train = X_train.to_numpy()
+    y_train = y_train.to_numpy()
+    X_test = X_test.to_numpy()
+    y_test = y_test.to_numpy()
 
     # Plotting convergence rate of logistic regression over SA heart disease data
-    raise NotImplementedError()
+    model = LogisticRegression()
+    model.fit(X_train, y_train)
+    y_pred = model.predict_proba(X_train)
+    fig = go.Figure(layout=go.Layout(title=f"Logistic Regression - ROC Curve",
+                                         xaxis=dict(title='False-Positive Rate'),
+                                         yaxis=dict(title='True-Positive Rate')))
+    fpr, tpr, th = metrics.roc_curve(y_train, y_pred)
+    fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines'))
+    fig.write_image(f'logistic_regression_roc_curve.pdf')
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
@@ -166,5 +179,5 @@ def fit_logistic_regression():
 
 if __name__ == '__main__':
     np.random.seed(0)
-    compare_fixed_learning_rates()
+    #compare_fixed_learning_rates()
     fit_logistic_regression()
