@@ -165,11 +165,16 @@ def fit_logistic_regression():
     model = LogisticRegression()
     model.fit(X_train, y_train)
     y_pred = model.predict_proba(X_train)
-    fig = go.Figure(layout=go.Layout(title=f"Logistic Regression - ROC Curve",
+    fpr, tpr, thr = metrics.roc_curve(y_train, y_pred)
+    arg_optim_alpha = np.argmax(tpr - fpr)
+    optim_alpha = thr[arg_optim_alpha]
+    fig = go.Figure(layout=go.Layout(title=f"Logistic Regression: ROC Curve [Optimal α={optim_alpha:.4f}]",
                                          xaxis=dict(title='False-Positive Rate'),
                                          yaxis=dict(title='True-Positive Rate')))
-    fpr, tpr, th = metrics.roc_curve(y_train, y_pred)
-    fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines'))
+    # ROC curve
+    fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', line=dict(color='red'), showlegend=False))
+    # Perspective axis
+    fig.add_trace(go.Scatter(x=(0, 1), y=(0, 1), mode='lines', line=dict(color='black'), showlegend=False))
     fig.write_image(f'logistic_regression_roc_curve.pdf')
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
