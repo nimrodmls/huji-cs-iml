@@ -103,6 +103,7 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
         # Note that passing X,y is redundant, as L1/L2 are not based on samples
         gd.fit(module(weights=np.copy(init)), None, None)
         all_values[name][lr] = values
+        print(f"Module={name}, LR={lr}, Minimal Loss={np.min(values):.4f}")
 
         # Plotting the descent path for each Module-LR combination
         fig = plot_descent_path(module, np.array(weights), title=f'module={name}, lr={lr}')
@@ -169,7 +170,7 @@ def fit_logistic_regression():
     fpr, tpr, thr = metrics.roc_curve(y_train, y_pred)
     arg_optim_alpha = np.argmax(tpr - fpr)
     optim_alpha = thr[arg_optim_alpha]
-    fig = go.Figure(layout=go.Layout(title=f"Logistic Regression: ROC Curve [Optimal α={optim_alpha:.4f}]",
+    fig = go.Figure(layout=go.Layout(title=f"Logistic Regression: ROC Curve",
                                          xaxis=dict(title='False-Positive Rate'),
                                          yaxis=dict(title='True-Positive Rate')))
     # Plotting the ROC curve
@@ -177,6 +178,11 @@ def fit_logistic_regression():
     # Plotting the perspective axis
     fig.add_trace(go.Scatter(x=(0, 1), y=(0, 1), mode='lines', line=dict(color='black'), showlegend=False))
     fig.write_image(f'logistic_regression_roc_curve.pdf')
+    
+    # Calculating the loss on the optimal alpha value
+    model = LogisticRegression(alpha=optim_alpha)
+    model.fit(X_train, y_train)
+    print(f'Optimal α: {optim_alpha:.4f}, Loss: {model.loss(X_test, y_test):.4f}')
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
@@ -192,9 +198,12 @@ def fit_logistic_regression():
 
     # Selecting the optimal lambda according to the validation loss
     opt_lambda = lambda_values[np.argmin(losses[:, 1])]
-    print(f"Optimal lambda: {opt_lambda}, Validation Loss: {np.min(losses[:, 1]):.4f}")
+    gd = GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000)
+    model = LogisticRegression(penalty='l1', alpha=0.5, lam=opt_lambda, solver=gd)
+    model.fit(X_train, y_train)
+    print(f"Optimal lambda: {opt_lambda}, Validation Loss: {np.min(losses[:, 1]):.4f}, Test Loss: {model.loss(X_test, y_test):.4f}")
 
 if __name__ == '__main__':
     np.random.seed(0)
-    #compare_fixed_learning_rates()
+    compare_fixed_learning_rates()
     fit_logistic_regression()
