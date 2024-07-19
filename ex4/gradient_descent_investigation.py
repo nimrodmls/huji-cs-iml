@@ -15,7 +15,8 @@ from utils import split_train_test
 from sklearn import metrics
 
 import plotly.graph_objects as go
-
+from cross_validate import cross_validate
+from loss_functions import misclassification_error
 
 def plot_descent_path(module: Type[BaseModule],
                       descent_path: np.ndarray,
@@ -171,16 +172,27 @@ def fit_logistic_regression():
     fig = go.Figure(layout=go.Layout(title=f"Logistic Regression: ROC Curve [Optimal α={optim_alpha:.4f}]",
                                          xaxis=dict(title='False-Positive Rate'),
                                          yaxis=dict(title='True-Positive Rate')))
-    # ROC curve
+    # Plotting the ROC curve
     fig.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', line=dict(color='red'), showlegend=False))
-    # Perspective axis
+    # Plotting the perspective axis
     fig.add_trace(go.Scatter(x=(0, 1), y=(0, 1), mode='lines', line=dict(color='black'), showlegend=False))
     fig.write_image(f'logistic_regression_roc_curve.pdf')
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-    raise NotImplementedError()
+    lambda_values = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
+    losses = np.zeros(shape=(len(lambda_values), 2))
 
+    # Computing train & validation losses with cross-validation, on L1 only
+    for i, lam in enumerate(lambda_values):
+        gd = GradientDescent(learning_rate=FixedLR(1e-4), max_iter=20000)
+        model = LogisticRegression(penalty='l1', alpha=0.5, lam=lam, solver=gd)
+        losses[i] = cross_validate(model, X_train, y_train, misclassification_error)
+        print(f"Logistic Regression with L1 Regularization λ={lam} - Train Loss: {losses[i, 0]:.4f}, Validation Loss: {losses[i, 1]:.4f}")
+
+    # Selecting the optimal lambda according to the validation loss
+    opt_lambda = lambda_values[np.argmin(losses[:, 1])]
+    print(f"Optimal lambda: {opt_lambda}, Validation Loss: {np.min(losses[:, 1]):.4f}")
 
 if __name__ == '__main__':
     np.random.seed(0)
